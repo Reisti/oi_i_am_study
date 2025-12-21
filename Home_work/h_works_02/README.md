@@ -41,6 +41,7 @@
 ###  3.Просмотрим таблицу МАС-адресов коммутатора.  
   1. s1#show mac address-table  
      |               Mac Address Table                  |  
+     |-------------------------------------------------:|
      |Vlan |   Mac Address    |     Type   |     Ports  |  
      |  1  |   0009.7cd9.9491 |   DYNAMIC  |    Fa0/6   |  
      |  1  |   0030.a33d.aa01 |   DYNAMIC  |    Fa0/1   |  
