@@ -40,27 +40,27 @@
    * S2 Fast Ethernet 0/1 0030.a33d.aa01 (bia 0030.a33d.aa01).   
 ###  3.Просмотрим таблицу МАС-адресов коммутатора.  
   1. s1#show mac address-table  
-     |               Mac Address Table                  |
-     |Vlan |   Mac Address    |     Type   |     Ports  |
-     |  1  |   0009.7cd9.9491 |   DYNAMIC  |    Fa0/6   |
-     |  1  |   0030.a33d.aa01 |   DYNAMIC  |    Fa0/1   |
-     |  1  |   0090.2b6a.2421 |   DYNAMIC  |    Fa0/1   |
-     |  1  |   00d0.d357.a8d6 |   DYNAMIC  |    Fa0/1   |
+     |               Mac Address Table                  |  
+     |Vlan |   Mac Address    |     Type   |     Ports  |  
+     |  1  |   0009.7cd9.9491 |   DYNAMIC  |    Fa0/6   |  
+     |  1  |   0030.a33d.aa01 |   DYNAMIC  |    Fa0/1   |  
+     |  1  |   0090.2b6a.2421 |   DYNAMIC  |    Fa0/1   |  
+     |  1  |   00d0.d357.a8d6 |   DYNAMIC  |    Fa0/1   |  
   2. s2#show mac address-table  
-     |               Mac Address Table                  |
-     |Vlan |   Mac Address    |     Type   |     Ports  |
-     |  1  |   0009.7cd9.9491 |   DYNAMIC  |    Fa0/1   |
-     |  1  |   0090.2b6a.2421 |   DYNAMIC  |    Fa0/16  |
-     |  1  |   00d0.581e.1401 |   DYNAMIC  |    Fa0/1   |
-     |  1  |   0060.5c8b.7518 |   DYNAMIC  |    Fa0/1   |
+     |               Mac Address Table                  |  
+     |Vlan |   Mac Address    |     Type   |     Ports  |  
+     |  1  |   0009.7cd9.9491 |   DYNAMIC  |    Fa0/1   |  
+     |  1  |   0090.2b6a.2421 |   DYNAMIC  |    Fa0/16  |  
+     |  1  |   00d0.581e.1401 |   DYNAMIC  |    Fa0/1   |  
+     |  1  |   0060.5c8b.7518 |   DYNAMIC  |    Fa0/1   |  
   3. MAC-адресса  сопоставимы с устройствами подключеными к   этому порту, у S1 на порту Fa0/1 MAC-адресс устройства S2.   У S2 на порту Fa0/1 MAC-адресс устройства S1.   
   4. Определить можно какие устройства подключены, т.к. на порт fa0/1 указивает несколько MAC-адрессов то следовательно за ним коммутатор. И зная топологию сети можно определись какому устройству принадлжеит какой MAC-адресс.  
 ###  4. Очистим таблицу МАС-адресов коммутатора S2 и снова отобразим таблицу МАС-адресов.  
    s2#clear mac address-table dynamic 
    s2#show mac address-table  
-     |               Mac Address Table                  |
-     |Vlan |   Mac Address    |     Type   |     Ports  |
-     |  1  |   00d0.581e.1401 |   DYNAMIC  |    Fa0/1   |
+     |               Mac Address Table                  |  
+     |Vlan |   Mac Address    |     Type   |     Ports  |  
+     |  1  |   00d0.581e.1401 |   DYNAMIC  |    Fa0/1   |  
 
 [def]: conf/s1.md   
 [def1]: conf/s2.md  
