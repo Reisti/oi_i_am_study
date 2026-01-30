@@ -115,13 +115,14 @@
       [Получим результат S1;][def2.1] 
 
     2. Коммутатор S2:  
-    S2(config)#interface range f0/2-17, F0/19-24, G0/1-2  
-    S2(config-if-range)#switchport mode access   
-    S2(config-if-range)#switchport access vlan 999  
-    S2(config-if-range)#shutdown  
-      
+      S2(config)#interface range f0/2-17, F0/19-24, G0/1-2  
+      S2(config-if-range)#switchport mode access  
+      S2(config-if-range)#switchport access vlan 999  
+      S2(config-if-range)#shutdown  
+    
       [Получим результат S2;][def3.1] 
   
+
 
 ###  3.Настройка маршрутизации между сетями VLAN;  
   1. Настройка маршрутизатор. 
