@@ -121,7 +121,7 @@
       S2(config-if-range)#switchport access vlan 999  
       S2(config-if-range)#shutdown  
       
-      [Получим результат S2;][def4.1]  
+      [Получим результат S2](conf/base_conf3.1.md )  
 
 ###  3.Настройка маршрутизации между сетями VLAN;  
   1. Настройка маршрутизатор. 
