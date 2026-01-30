@@ -121,7 +121,7 @@
       S2(config-if-range)#switchport access vlan 999  
       S2(config-if-range)#shutdown  
       
-      [Получим результат S2;][def3.1]  
+      [Получим результат S2;][def4.1]  
 
 ###  3.Настройка маршрутизации между сетями VLAN;  
   1. Настройка маршрутизатор. 
@@ -152,11 +152,11 @@
   2.  Отправляем эхо-запрос с PC-A на PC-B    
   3.  Отправляем команду ping с компьютера PC-A на коммутатор S2.
       ![Ping PC-A](pingPCa_all.png)   
-  4.  С PC-B выполним команду tracert на адрес PC-A
-      ![tracert PC-B > PC-A ](pingPCb_pca.png)
-      промежуточных IP-адреса отображаются:
-      192.168.30.1
-      192.168.20.3
+  4.  С PC-B выполним команду tracert на адрес PC-A  
+      ![tracert PC-B > PC-A ](pingPCb_pca.png)  
+      промежуточных IP-адреса отображаются:  
+      192.168.30.1  
+      192.168.20.3  
        
 
 [def]: conf/base_conf.md   
@@ -164,4 +164,4 @@
 [def2]: conf/base_conf3.md   
 [def1.1]: conf/base_conf.1.md   
 [def2.1]: conf/base_conf2.1.md   
-[def3.1]: conf/base_conf3.1.md   
+[def4.1]: conf/base_conf3.1.md   
