@@ -111,12 +111,12 @@
         
    1. Определяем коммутатор с заблокированным портом.  
      
-    Коммутатор S2 Порт Fa0/2  
+  Коммутатор S2 Порт Fa0/2  
         
    2. Изменяем стоимость порта.
      
-    S2(config)#interface f0/4  
-    S2(config-if)#spanning-tree vlan 1 cost 18
+  S2(config)#interface f0/4  
+  S2(config-if)#spanning-tree vlan 1 cost 18
 
 
   ![show spanning-tree S2](sp01portprio.png)    
