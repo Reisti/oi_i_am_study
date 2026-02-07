@@ -27,8 +27,6 @@
  
 ###  1. Создание сети и настройка основных параметров устройства; 
   1. Создаем сеть согласно топологии.  
-    
-     ![Топология](image.png)  
           
   2. Настрайваем базовые параметры для коммутатора  
 
@@ -89,11 +87,11 @@
   
   3. Включаем порты F0/2 и F0/4:   
   
-    ![show spanning-tree S1](sp01.png)    
+  ![show spanning-tree S1](sp01.png)    
   
-    ![show spanning-tree S2](sp02.png)    
+  ![show spanning-tree S2](sp02.png)    
   
-    ![show spanning-tree S3](sp03.png)    
+  ![show spanning-tree S3](sp03.png)    
 
       1. Какой коммутатор является корневым мостом?   
           Корневой мост является S3.  
@@ -135,11 +133,11 @@
 ### 4. Часть 4:	Наблюдение за процессом выбора протоколом STP порта, исходя из приоритета портов.  
   1.  Включаем порты F0/1 и F0/3 на всех коммутаторах.  
   
-    ![show spanning-tree S1](sp01p4.png)    
+  ![show spanning-tree S1](sp01p4.png)    
   
-    ![show spanning-tree S2](sp02p4.png)    
+  ![show spanning-tree S2](sp02p4.png)    
   
-    ![show spanning-tree S3](sp03p4.png)    
+  ![show spanning-tree S3](sp03p4.png)    
 
 
 
