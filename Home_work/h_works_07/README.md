@@ -109,13 +109,14 @@
 
 ###  3.	Наблюдение за процессом выбора протоколом STP порта, исходя из стоимости портов;  
         
-      1. Определяем коммутатор с заблокированным портом.  
-            Коммутатор S2 Порт Fa0/2  
+   1. Определяем коммутатор с заблокированным портом.  
+           
+    Коммутатор S2 Порт Fa0/2  
         
-      2. Изменяем стоимость порта.
+   2. Изменяем стоимость порта.
 
-          S2(config)#interface f0/4
-          S2(config-if)#spanning-tree vlan 1 cost 18
+    S2(config)#interface f0/4
+    S2(config-if)#spanning-tree vlan 1 cost 18
 
 
   ![show spanning-tree S2](sp01portprio.png)    
@@ -127,8 +128,8 @@
 
    3. Удаляем изменения стоимости порта.  
   
-     S2(config)#interface f0/4  
-     S2(config-if)#no spanning-tree vlan 1 cost 18  
+    S2(config)#interface f0/4  
+    S2(config-if)#no spanning-tree vlan 1 cost 18  
   
 ### 4. Часть 4:	Наблюдение за процессом выбора протоколом STP порта, исходя из приоритета портов.  
   1.  Включаем порты F0/1 и F0/3 на всех коммутаторах.  
