@@ -11,7 +11,7 @@ no service password-encryption
 hostname R1  
 !  
 enable secret 5 $1$mERr$9cTjUIEqNGurQiFU.ZeCi1  
-!
+!  
 ip dhcp relay information trust-all   
 !  
 ip dhcp excluded-address 192.168.1.1 192.168.1.5  
