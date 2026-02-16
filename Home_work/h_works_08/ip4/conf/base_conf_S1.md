@@ -17,6 +17,9 @@ no ip domain-lookup
 ip domain-name S1.local  
 !  
 username admin secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0  
+!
+ip dhcp snooping vlan 100,200  
+ip dhcp snooping  
 !  
 spanning-tree mode pvst  
 spanning-tree extend system-id  
@@ -44,6 +47,7 @@ interface FastEthernet0/4
 interface FastEthernet0/5  
  switchport trunk native vlan 1000  
  switchport trunk allowed vlan 100,200  
+ ip dhcp snooping trust   
  switchport mode trunk  
 !  
 interface FastEthernet0/6  

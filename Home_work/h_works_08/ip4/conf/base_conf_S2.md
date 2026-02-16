@@ -17,6 +17,9 @@ no ip domain-lookup
 ip domain-name s2.local  
 !  
 username admin secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0  
+!
+ip dhcp snooping vlan 1  
+ip dhcp snooping  
 !  
 spanning-tree mode pvst  
 spanning-tree extend system-id  
@@ -33,7 +36,8 @@ interface FastEthernet0/3
 interface FastEthernet0/4  
  shutdown  
 !  
-interface FastEthernet0/5  
+interface FastEthernet0/5 
+ ip dhcp snooping trust  
 !  
 interface FastEthernet0/6  
  shutdown  
