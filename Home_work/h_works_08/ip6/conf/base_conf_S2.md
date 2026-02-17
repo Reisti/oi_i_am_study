@@ -1,7 +1,7 @@
 s2#show running-config   
 Building configuration...  
   
-Current configuration : 1612 bytes  
+Current configuration : 1562 bytes  
 !  
 version 15.0  
 no service timestamps log datetime msec  
@@ -18,9 +18,6 @@ ip domain-name s2.local
 !  
 username admin secret 5 $1$mERr$hx5rVt7rPNoS4wqbXKX7m0  
 !  
-ip dhcp snooping vlan 1  
-ip dhcp snooping  
-!  
 spanning-tree mode pvst  
 spanning-tree extend system-id  
 !  
@@ -36,8 +33,7 @@ interface FastEthernet0/3
 interface FastEthernet0/4  
  shutdown  
 !  
-interface FastEthernet0/5 
- ip dhcp snooping trust  
+interface FastEthernet0/5  
 !  
 interface FastEthernet0/6  
  shutdown  
@@ -79,7 +75,7 @@ interface FastEthernet0/18
 !  
 interface FastEthernet0/19  
  shutdown  
-!  
+!   
 interface FastEthernet0/20  
  shutdown  
 !  
@@ -102,9 +98,8 @@ interface GigabitEthernet0/2
  shutdown  
 !  
 interface Vlan1  
- ip address 192.168.1.98 255.255.255.240  
-!  
-ip default-gateway 192.168.1.97  
+ no ip address  
+ shutdown  
 !  
 banner motd ^CAdeptus Mechanicus^C  
 !  
