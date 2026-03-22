@@ -1,10 +1,10 @@
-#  Лабораторная работа - Конфигурация безопасности коммутатора   
+#  Лабораторная работа. Настройка протокола OSPFv2 для одной области  
 
 ###  Задание:  
 
- 1. Настройка основного сетевого устройства  
- 2. Настройка сетей VLAN   
- 3. Настройки безопасности коммутатора.  
+ 1. Создание сети и настройка основных параметров устройства.   
+ 2. Настройка и проверка базовой работы протокола  OSPFv2 для одной области.   
+ 3. Оптимизация и проверка конфигурации OSPFv2 для одной области.    
 
 
  
@@ -14,20 +14,17 @@
 #### Таблица адресации:
 | Устройство   | Интерфейс   | IP-адрес       | Маска подсети |
 |-------------:|:------------|:---------------|:--------------|  
-| R1           | G0/0/1      | 192.168.10.1   | 255.255.255.0 |    
-|              | Loopback    | 10.10.1.1      | 255.255.255.0 |  
-| S1           | VLAN 10     | 192.168.10.201 | 255.255.255.0 |  
-|              | VLAN 10     | 192.168.10.202 | 255.255.255.0 |  
-| PC-A         | NIC         |     DHCP       | 255.255.255.0 |  
-| PC-B         | NIC         |     DHCP       | 255.255.255.0 |   
-
+| R1           | G0/0/1      | 10.53.0.1      | 255.255.255.0 |    
+|              | Loopback    | 172.16.1.1     | 255.255.255.0 |  
+| R2           | G0/0/1      | 10.53.0.2      | 255.255.255.0 |  
+|              | Loopback    | 192.168.1.1    | 255.255.255.0 |  
     
 #### Топология:  
    ![Топология](image.png)  
   
 ###  Решение:  
  
-###  1. Настройка основного сетевого устройства; 2. Настройка сетей VLAN;   
+###  1.Создание сети и настройка основных параметров устройства;   
   1. Создаем сеть согласно топологии.  
           
   2. Настрайваем параметры для устройств  
@@ -38,75 +35,9 @@
 
       [Получим результат R1;][def2]  
 
-  3.  Проверьте с помощью команды show interfaces, отключение согласование DTP   
+      [Получим результат R2;][def3]
 
-            S1#show interfaces f0/1 switchport | include Negotiation  
-            Negotiation of Trunking: Off  
-
-            S2#show interfaces f0/1 switchport | include Negotiation  
-            Negotiation of Trunking: Off  
-
-  4.  Безопасность неиспользуемых портов коммутатора.  
-
-            S1#show interfaces status  
-            Port      Name               Status       Vlan       Duplex  Speed Type  
-            Fa0/1                        connected    trunk      auto    auto  10/100BaseTX  
-            Fa0/2                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/3                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/4                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/5                        connected    trunk      auto    auto  10/100BaseTX  
-            Fa0/6                        connected    10         auto    auto  10/100BaseTX  
-            Fa0/7                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/8                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/9                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/10                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/11                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/12                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/13                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/14                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/15                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/16                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/17                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/18                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/19                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/20                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/21                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/22                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/23                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/24                       disabled 999        auto    auto  10/100BaseTX  
-            Gig0/1                       disabled 999        auto    auto  10/100BaseTX  
-            Gig0/2                       disabled 999        auto    auto  10/100BaseTX  
-
-            S2# show interfaces status   
-            Port      Name               Status       Vlan       Duplex  Speed Type  
-            Fa0/1                        connected    trunk      auto    auto  10/100BaseTX  
-            Fa0/2                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/3                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/4                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/5                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/6                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/7                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/8                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/9                        disabled 999        auto    auto  10/100BaseTX  
-            Fa0/10                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/11                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/12                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/13                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/14                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/15                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/16                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/17                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/18                       connected    10         auto    auto  10/100BaseTX  
-            Fa0/19                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/20                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/21                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/22                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/23                       disabled 999        auto    auto  10/100BaseTX  
-            Fa0/24                       disabled 999        auto    auto  10/100BaseTX  
-            Gig0/1                       disabled 999        auto    auto  10/100BaseTX  
-            Gig0/2                       disabled 999        auto    auto  10/100BaseTX  
-
-###  2. Документирование и реализация функций безопасности порта.     
+  ###  2. Настройка и проверка базовой работы протокола OSPFv2 для одной области.      
    1.	На S1, введите команду show port-security interface f0/6  для отображения настроек по умолчанию безопасности порта для интерфейса F0/6.  
 
       | Функция                                    | Настройка по умолчаниюю |  
@@ -302,4 +233,5 @@
 [def]: conf/base_conf_S1.md   
 [def1]: conf/base_conf_S2.md    
 [def2]: conf/base_conf_R1.md   
+[def3]: conf/base_conf_R2.md   
  
