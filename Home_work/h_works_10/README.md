@@ -37,198 +37,162 @@
 
       [Получим результат R2;][def3]
 
-  ###  2. Настройка и проверка базовой работы протокола OSPFv2 для одной области.      
-   1.	На S1, введите команду show port-security interface f0/6  для отображения настроек по умолчанию безопасности порта для интерфейса F0/6.  
-
-      | Функция                                    | Настройка по умолчаниюю |  
-      |--------------------------------------------|-------------------------|  
-      |Защита портов                               | Disabled                |  
-      |Максимальное количество записей MAC-адресов | 1                       |  
-      |Режим проверки на нарушение безопасности    | Shutdown                |  
-      |Aging Time                                  | 0 mins                  |  
-      |Aging Type                                  | Absolute                |  
-      |Sticky Static Address Aging                 | Disable                 |  
-      |Sticky MAC Address                          | Disable                 |  
-
-
-   2. На S1 включим защиту порта на F0 / 6 со следующими настройками:  
- 
-            S1(config-if)#switchport port-security   
-            S1(config-if)#switchport port-security aging time 60  
-            S1(config-if)#switchport port-security violation restrict   
-            S1(config-if)#switchport port-security maximum 3  
-            S1(config-if)#switchport port-security aging type inactivity (В Cisco PT нету)  
-
-            show port-security interface f0/6   
-            Port Security              : Enabled  
-            Port Status                : Secure-up  
-            Violation Mode             : Restrict  
-            Aging Time                 : 60 mins  
-            Aging Type                 : Absolute  
-            SecureStatic Address Aging : Disabled  
-            Maximum MAC Addresses      : 3  
-            Total MAC Addresses        : 0  
-            Configured MAC Addresses   : 0  
-            Sticky MAC Addresses       : 0  
-            Last Source Address:Vlan   : 0000.0000.0000:0  
-            Security Violation Count   : 0  
-
-            S1#show port-security address  
-               Secure Mac Address Table  
-            -----------------------------------------------------------------------------  
-            Vlan    Mac Address       Type                          Ports   Remaining Age  
-                                                                              (mins)  
-            ----    -----------       ----                          -----   -------------  
-            10	0001.43EA.C32C	DynamicConfigured	FastEthernet0/6		-  
-            -----------------------------------------------------------------------------  
-            Total Addresses in System (excluding one mac per port)     : 0  
-            Max Addresses limit in System (excluding one mac per port) :  
-
-   3. На S2 включим защиту порта на F0 / 18 со следующими настройкамиЖ   
-
-            S2(config)#interface fastEthernet 0/18  
-            S2(config-if)#switchport port-security   
-            S2(config-if)#switchport port-security aging time 60  
-            S2(config-if)#switchport port-security violation protect   
-            S2(config-if)#switchport port-security maximum 2  
+###  2. Настройка и проверка базовой работы протокола OSPFv2 для одной области.      
+   1.	Настройваем адреса интерфейса и базового OSPFv2 на каждом маршрутизаторе.  
+  
+            R1(config)#router ospf 56   
+            R1(config-router)#router-id 1.1.1.1   
+            R1(config-router)#network 10.53.0.0 0.0.0.255 area 0  
+     
+      Проверка:  
+  
+            R1#show ip ospf neighbor  
+            Neighbor ID Pri State Dead Time Address Interface  
+            2.2.2.2 1 FULL/BDR 00:00:33 10.53.0.2 GigabitEthernet0/0/1  
 
 
-            S2#show port-security interface f0/18  
-            Port Security              : Enabled  
-            Port Status                : Secure-up  
-            Violation Mode             : Protect  
-            Aging Time                 : 60 mins  
-            Aging Type                 : Absolute  
-            SecureStatic Address Aging : Disabled  
-            Maximum MAC Addresses      : 2  
-            Total MAC Addresses        : 0  
-            Configured MAC Addresses   : 0  
-            Sticky MAC Addresses       : 0  
-            Last Source Address:Vlan   : 0000.0000.0000:0  
-            Security Violation Count   : 0  
 
-            S2#show port-security address  
-                           Secure Mac Address Table  
-            -----------------------------------------------------------------------------  
-            Vlan    Mac Address       Type                          Ports   Remaining Age  
-                                                                              (mins)  
-            ----    -----------       ----                          -----   -------------  
-            10	0090.2BBB.A9BE	DynamicConfigured	FastEthernet0/18		-  
-            -----------------------------------------------------------------------------  
-            Total Addresses in System (excluding one mac per port)     : 0  
-            Max Addresses limit in System (excluding one mac per port) : 1024  
+            R2(config)#router ospf 56  
+            R2(config-router)#router-id 2.2.2.2  
+            R2(config-router)#network 10.53.0.0 0.0.0.255 area 0  
+            R2(config-router)# network 192.168.1.0 0.0.0.255 area 0  
+    
+        Проверка:  
+          
+            R2#show ip ospf neighbor  
+            Neighbor ID Pri State Dead Time Address Interface  
+            1.1.1.1 1 FULL/DR 00:00:33 10.53.0.1 GigabitEthernet0/0/1  
+
+   2. Проверка.    
+  
+            R1#show ip route ospf   
+            O    192.168.1.0 [110/2] via 10.53.0.2, 00:00:01, GigabitEthernet0/0/1  
+                
+            R1#ping 192.168.1.1  
+            Type escape sequence to abort.  
+            Sending 5, 100-byte ICMP Echos to 192.168.1.1, timeout is 2 seconds:  
+            !!!!!  
+            Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/4 ms  
+  
+  
+###  3. Оптимизация и проверка конфигурации OSPFv2 для одной области.    
+   1. Настроим приоритет OSPF, и таймеры.    
+  
+            R1(config)# interface GigabitEthernet0/0/1  
+            R1(config-if)# ip ospf priority 50  
+            R1(config-if)# ip ospf hello-interval 30  
+            R1(config-if)# ip ospf dead-interval 120  
+  
+            R2(config)# interface GigabitEthernet0/0/1  
+            R2(config-if)# ip ospf hello-interval 30  
+            R2(config-if)# ip ospf dead-interval 120  
+           
+   2. На R1 настройм статический маршрут.   
+     
+            R1(config)# ip route 0.0.0.0 0.0.0.0 Loopback1   
+            R1(config)# router ospf 56   
+            R1(config-router)# default-information originate  
+  
+        Проверка:  
             
+            R2#show ip route ospf   
+            O*E2 0.0.0.0/0 [110/1] via 10.53.0.1, 00:12:35, GigabitEthernet0/0/1  
+  
+   3. Добавим конфигурацию, необходимую для OSPF для обработки R2 Loopback 1 как сети точка-точка.  
+  
+            R2(config)# interface Loopback1  
+            R2(config-if)# ip ospf network point-to-point  
+            R2(config-if)# end  
+            R2# clear ip ospf process  
+              
+        Проверка:  
+          
+            R1# show ip route ospf  
+            O    192.168.1.0/24 [110/2] via 10.53.0.2, GigabitEthernet0/0/1  
+  
+   4. На R2 добавим конфигурацию, необходимую для предотвращения отправки объявлений OSPF в сеть Loopback 1.  
+   
+            R2(config)# router ospf 56  
+            R2(config-router)# passive-interface Loopback1  
 
-###  3. Реализовать безопасность DHCP snooping.  
-   1. На S2 включим DHCP snooping и настроим DHCP snooping во VLAN 10  
-
-            S2(config)#ip dhcp snooping   
-            S2(config)#ip dhcp snooping vlan 10  
-            S2(config)#interface fastEthernet 0/1  
-            S2(config-if)#ip dhcp snooping trust   
-            S2(config-if)#exit  
-            S2(config-if)#interface fastEthernet 0/18  
-            S2(config-if)#no ip dhcp snooping limit rate 5  
-
-            Switch DHCP snooping is enabled  
-            DHCP snooping is configured on following VLANs:  
-            10  
-            Insertion of option 82 is enabled  
-            Option 82 on untrusted port is not allowed  
-            Verification of hwaddr field is enabled  
-            Interface                  Trusted    Rate limit (pps)  
-            -----------------------    -------    ----------------  
-            FastEthernet0/1            yes        unlimited         
-            FastEthernet0/18           no         5   
-
-            S2#show ip dhcp snooping binding   
-            MacAddress          IpAddress        Lease(sec)  Type           VLAN  Interface  
-            ------------------  ---------------  ----------  -------------  ----  -----------------  
-            00:90:2B:BB:A9:BE   192.168.10.11    0           dhcp-snooping  10    FastEthernet0/18  
-            Total number of bindings: 1  
-
-   2. На PC-B Выполним  
-
-            C:\Users\Student> ipconfig /release  
-            C:\Users\Student> ipconfig /renew  
-
-   3. Проверим привязку отслеживания DHCP с помощью команды show ip dhcp snooping binding  
-
-            S2#show ip dhcp snooping binding   
-            MacAddress          IpAddress        Lease(sec)  Type           VLAN  Interface  
-            ------------------  ---------------  ----------  -------------  ----  -----------------  
-            00:90:2B:BB:A9:BE   192.168.10.10    0           dhcp-snooping  10    FastEthernet0/18  
-            Total number of bindings: 1
-
-### 4. Реализация PortFast и BPDU Guard  
-
-            S1#show spanning-tree interface FastEthernet0/6 detail  
-            Port 6 (FastEthernet0/6) of VLAN0010 is designated forwarding  
-            Port path cost 19, Port priority 128, Port Identifier 128.6  
-            Designated root has priority 32778, address 0002.4AD4.7322  
-            Designated bridge has priority 32778, address 0007.ECEE.628C  
-            Designated port id is 128.6, designated path cost 19  
-            Timers: message age 16, forward delay 0, hold 0  
-            Number of transitions to forwarding state: 1  
-            The port is in the portfast mode  
-            Link type is point-to-point by default  
-
-   Так как отсутствует
+        Проверка:    
             
-            Bpdu guard is enabled
-            BPDU: sent 128, received 0
-
-   Проверяем через show running-config  
-
-            S1#show running-config   
-            interface FastEthernet0/6  
-            switchport access vlan 10  
-            switchport mode access  
-            switchport port-security  
-            switchport port-security maximum 3  
-            switchport port-security violation restrict   
-            switchport port-security aging time 60  
-            spanning-tree portfast  
-            spanning-tree bpduguard enable  
-
-### 5. Проверим наличие сквозного ⁪подключения.  
+            R2#show ip ospf interface loopback 1  
   
-            C:\>ping 192.168.10.202  
-            Pinging 192.168.10.202 with 32 bytes of data:  
-            Reply from 192.168.10.202: bytes=32 time<1ms TTL=255  
-            Reply from 192.168.10.202: bytes=32 time<1ms TTL=255  
+            Loopback1 is up, line protocol is up  
+            Internet address is 192.168.1.1/24, Area 0  
+            Process ID 56, Router ID 2.2.2.2, Network Type POINT-TO-POINT, Cost: 1  
+            Transmit Delay is 1 sec, State POINT-TO-POINT,  
+            Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5  
+               No Hellos (Passive interface)   #<<<<<< Пассивный интерфейс  
+            Index 1/1, flood queue length 0  
+            Next 0x0(0)/0x0(0)  
+            Last flood scan length is 1, maximum is 1  
+            Last flood scan time is 0 msec, maximum is 0 msec  
+            Suppress hello for 0 neighbor(s)  
   
-            C:\>ping 192.168.10.1  
-            Pinging 192.168.10.1 with 32 bytes of data:  
-            Reply from 192.168.10.1: bytes=32 time<1ms TTL=255  
-            Reply from 192.168.10.1: bytes=32 time<1ms TTL=255  
+   5. Изменение базовой пропускной способности для маршрутизаторов.
   
-            C:\>ping 192.168.10.10  
-            Pinging 192.168.10.10 with 32 bytes of data:  
-            Reply from 192.168.10.10: bytes=32 time<1ms TTL=128  
-            Reply from 192.168.10.10: bytes=32 time<1ms TTL=128  
+            R1(config)# router ospf 56  
+            R1(config-router)# auto-cost reference-bandwidth 1000  
+            R1(config-router)# end  
+            R1# clear ip ospf process  
   
-            C:\>ping 192.168.10.201  
-            Pinging 192.168.10.201 with 32 bytes of data:  
-            Reply from 192.168.10.201: bytes=32 time<1ms TTL=255  
-            Reply from 192.168.10.201: bytes=32 time<1ms TTL=255  
-
-### Вопросы для повторения:  
-
-1.	С точки зрения безопасности порта на S2, почему нет значения таймера для оставшегося возраста в минутах, когда было сконфигурировано динамическое обучение - sticky?  
+            R2(config)# router ospf 56  
+            R2(config-router)# auto-cost reference-bandwidth 1000  
+            R2(config-router)# end  
+            R2# clear ip ospf process  
+              
+        Сообщение в консоли:  
   
-        Так как адреса, выученные через sticky, по умолчанию считаются статическими
-
-2.	Что касается безопасности порта на S2, если вы загружаете скрипт текущей конфигурации на S2, почему порту 18 на PC-B никогда не получит IP-адрес через DHCP?  
+            R1#  
+            00:27:30: %OSPF-5-ADJCHG: Process 56, Nbr 2.2.2.2 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Adjacency forced to reset  
   
-        Так как в конфигурации порта 18 уже зафиксирован другой MAC-адрес, который не совпадает с MAC-адресом карты сети PC-B.  
-
-
-3.	Что касается безопасности порта, в чем разница между типом абсолютного устаревания и типом устаревание по неактивности?  
+            00:27:30: %OSPF-5-ADJCHG: Process 56, Nbr 2.2.2.2 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Interface down or detached  
   
-         Разница заключается в логике работы таймера старения.
-
-
+            00:28:30: %OSPF-5-ADJCHG: Process 56, Nbr 2.2.2.2 on GigabitEthernet0/0/1 from LOADING to FULL, Loading Done  
+  
+            R2#  
+            00:27:39: %OSPF-5-ADJCHG: Process 56, Nbr 1.1.1.1 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Adjacency forced to reset  
+  
+            00:27:39: %OSPF-5-ADJCHG: Process 56, Nbr 1.1.1.1 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Interface down or detached  
+  
+            00:28:30: %OSPF-5-ADJCHG: Process 56, Nbr 1.1.1.1 on GigabitEthernet0/0/1 from LOADING to FULL, Loading Done  
+          
+### 4. Убедитесь, что оптимизация OSPFv2 реализовалась.   
+  
+            R1#show ip ospf interface GigabitEthernet0/0/1  
+  
+            GigabitEthernet0/0/1 is up, line protocol is up  
+            Internet address is 10.53.0.1/24, Area 0  
+            Process ID 56, Router ID 1.1.1.1, Network Type >>>BROADCAST<<, Cost: 10  
+            Transmit Delay is 1 sec, State DR, Priority >>>50<<<  
+            Designated Router (ID) 1.1.1.1, Interface address 10.53.0.1  
+            Backup Designated Router (ID) 2.2.2.2, Interface address 10.53.0.2  
+            Timer intervals configured, >>>Hello 30<<<, >>>Dead 120<<<, Wait 120, Retransmit 5  
+               Hello due in 00:00:12  
+            Index 1/1, flood queue length 0  
+            Next 0x0(0)/0x0(0)  
+            Last flood scan length is 1, maximum is 1  
+            Last flood scan time is 0 msec, maximum is 0 msec  
+            Neighbor Count is 1, Adjacent neighbor count is 1  
+               Adjacent with neighbor 2.2.2.2  (Backup Designated Router)  
+            Suppress hello for 0 neighbor(s)  
+  
+            R1#show ip route ospf  
+            O    192.168.1.0 [110/10] via 10.53.0.2, 00:08:00, GigabitEthernet0/0/1  
+  
+            R2#ping 172.16.1.1  
+            Type escape sequence to abort.  
+            Sending 5, 100-byte ICMP Echos to 172.16.1.1, timeout is 2 seconds:  
+            !!!!!  
+            Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/1 ms  
+              
+        Вопрос: Почему стоимость OSPF для маршрута по умолчанию отличается от стоимости OSPF в R1 для сети 192.168.1.0/24? 
+         Маршрут по умолчанию:  
+           * Маршрут по умолчанию не накапливают стоимость через OSPF-домен  
+         Сеть 192.168.1.0/24:  
+           * Стоимость накапливается по всем интерфейсам на пути  
 
 [def]: conf/base_conf_S1.md   
 [def1]: conf/base_conf_S2.md    
