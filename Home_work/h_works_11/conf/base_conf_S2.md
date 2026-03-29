@@ -1,7 +1,7 @@
-S2#show run  
+S2#show running-config   
 Building configuration...  
   
-Current configuration : 1324 bytes  
+Current configuration : 1325 bytes  
 !  
 version 15.0  
 no service timestamps log datetime msec  
@@ -29,7 +29,7 @@ interface Vlan1
  no ip address  
  shutdown  
 !  
-banner motd ^C Adeptus Mechanicus ^C  
+banner motd ^C Adeptus Mechanicus ^^C  
 !  
 line con 0  
  login local  

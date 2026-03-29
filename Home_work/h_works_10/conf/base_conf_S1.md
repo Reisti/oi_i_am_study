@@ -23,8 +23,6 @@ spanning-tree extend system-id
 !  
 interface FastEthernet0/1  
 !  
-------  
-!  
 interface GigabitEthernet0/2  
 !  
 interface Vlan1  
