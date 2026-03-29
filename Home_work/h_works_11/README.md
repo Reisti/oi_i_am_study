@@ -54,61 +54,72 @@
       [Получим результат R2;][def3]
 
 ###  2. Настройка сетей VLAN на коммутаторах.      
-   1.	Настройваем адреса интерфейса и базового OSPFv2 на каждом маршрутизаторе.  
-  
-            R1(config)#router ospf 56   
-            R1(config-router)#router-id 1.1.1.1   
-            R1(config-router)#network 10.53.0.0 0.0.0.255 area 0  
-     
-      Проверка:  
-  
-            R1#show ip ospf neighbor  
-            Neighbor ID Pri State Dead Time Address Interface  
-            2.2.2.2 1 FULL/BDR 00:00:33 10.53.0.2 GigabitEthernet0/0/1  
-
-
-
-            R2(config)#router ospf 56  
-            R2(config-router)#router-id 2.2.2.2  
-            R2(config-router)#network 10.53.0.0 0.0.0.255 area 0  
-            R2(config-router)# network 192.168.1.0 0.0.0.255 area 0  
+   1.	Создайте сети VLAN на коммутаторах. 
+        a. Настройка коммутатора S1.  
     
-        Проверка:  
-          
-            R2#show ip ospf neighbor  
-            Neighbor ID Pri State Dead Time Address Interface  
-            1.1.1.1 1 FULL/DR 00:00:33 10.53.0.1 GigabitEthernet0/0/1  
-
-   2. Проверка.    
+            S1(config)#vlan 20  
+            S1(config-vlan)#name Managment  
+            S1(config)#vlan 30  
+            S1(config-vlan)#name Operations  
+            S1(config)#vlan 40  
+            S1(config-vlan)#name Sales  
+            S1(config)#vlan 999  
+            S1(config-vlan)#name ParkingLot  
+            S1(config-vlan)#vlan 1000  
+       
+            S1(config)#interface FastEthernet 0/6    
+            S1(config-if)#switchport mode access     
+            S1(config-if)#switchport access vlan 30    
+            S1(config)#interface range f0/2-4,f0/7-24,g0/1-2    
+            S1(config-if-range)#switchport mode access     
+            S1(config-if-range)#switchport access vlan 999    
+            S1(config-if-range)#shutdown     
   
-            R1#show ip route ospf   
-            O    192.168.1.0 [110/2] via 10.53.0.2, 00:00:01, GigabitEthernet0/0/1  
-                
-            R1#ping 192.168.1.1  
-            Type escape sequence to abort.  
-            Sending 5, 100-byte ICMP Echos to 192.168.1.1, timeout is 2 seconds:  
-            !!!!!  
-            Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/4 ms  
+        b. Настройка коммутатора S2.   
+    
+            S2(config)#vlan 20  
+            S2(config-vlan)#name Management  
+            S2(config)#vlan 30  
+            S2(config-vlan)#name Operations  
+            S2(config)#vlan 40  
+            S2(config-vlan)#name Sales  
+            S2(config)#vlan 999  
+            S2(config-vlan)#name ParkingLot  
+            S2(config)#vlan 1000  
+  
+            S2(config)#interface fastEthernet 0/5  
+            S2(config-if)#switchport mode access   
+            S2(config-if)#switchport access vlan 20  
+            S2(config)#interface f0/18  
+            S2(config-if)#switchport mode access   
+            S2(config-if)#switchport access vlan 40  
+            S2(config)#interface range f0/2-4,f0/6-17,f0/19-24,g0/1-2  
+            S2(config-if-range)#switchport mode access   
+            S2(config-if-range)#switchport access vlan 999  
+            S2(config-if-range)#shutdown   
+  
+    
+###  3. Настройте транки (магистральные каналы).    
+   1. Вручную настроим магистральный интерфейс F0/1.    
+    
+            S1(config)#interface fastEthernet 0/1  
+            S1(config-if)#switchport mode trunk   
+            S1(config-if)#switchport trunk native vlan 1000  
+            S1(config-if)#switchport trunk allowed vlan 20,30,40  
+  
+            S2(config)#interface f0/1  
+            S2(config-if)#switchport mode trunk   
+            S2(config-if)#switchport trunk native vlan 1000  
+            S2(config-if)#switchport trunk allowed vlan 20,30,40  
   
   
-###  3. Оптимизация и проверка конфигурации OSPFv2 для одной области.    
-   1. Настроим приоритет OSPF, и таймеры.    
-  
-            R1(config)# interface GigabitEthernet0/0/1  
-            R1(config-if)# ip ospf priority 50  
-            R1(config-if)# ip ospf hello-interval 30  
-            R1(config-if)# ip ospf dead-interval 120  
-  
-            R2(config)# interface GigabitEthernet0/0/1  
-            R2(config-if)# ip ospf hello-interval 30  
-            R2(config-if)# ip ospf dead-interval 120  
-           
-   2. На R1 настройм статический маршрут.   
-     
-            R1(config)# ip route 0.0.0.0 0.0.0.0 Loopback1   
-            R1(config)# router ospf 56   
-            R1(config-router)# default-information originate  
-  
+   2. Вручную настроим магистральный интерфейс F0/5 на коммутаторе S1..     
+       
+            S1(config)#interface f 0/5  
+            S1(config-if)#switchport mode trunk   
+            S1(config-if)#switchport trunk native vlan 1000  
+            S1(config-if)#switchport trunk allowed vlan 20,30,40  
+ ______________________________________________________________ Дальше не делал
         Проверка:  
             
             R2#show ip route ospf   
