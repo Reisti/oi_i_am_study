@@ -119,74 +119,105 @@
             S1(config-if)#switchport mode trunk   
             S1(config-if)#switchport trunk native vlan 1000  
             S1(config-if)#switchport trunk allowed vlan 20,30,40  
- ______________________________________________________________ Дальше не делал
-        Проверка:  
-            
-            R2#show ip route ospf   
-            O*E2 0.0.0.0/0 [110/1] via 10.53.0.1, 00:12:35, GigabitEthernet0/0/1  
-  
-   3. Добавим конфигурацию, необходимую для OSPF для обработки R2 Loopback 1 как сети точка-точка.  
-  
-            R2(config)# interface Loopback1  
-            R2(config-if)# ip ospf network point-to-point  
-            R2(config-if)# end  
-            R2# clear ip ospf process  
-              
-        Проверка:  
-          
-            R1# show ip route ospf  
-            O    192.168.1.0/24 [110/2] via 10.53.0.2, GigabitEthernet0/0/1  
-  
-   4. На R2 добавим конфигурацию, необходимую для предотвращения отправки объявлений OSPF в сеть Loopback 1.  
-   
-            R2(config)# router ospf 56  
-            R2(config-router)# passive-interface Loopback1  
 
-        Проверка:    
-            
-            R2#show ip ospf interface loopback 1  
+### 4. Настройте маршрутизацию.  
+   1. Настройка маршрутизации между сетями VLAN на R1  
   
-            Loopback1 is up, line protocol is up  
-            Internet address is 192.168.1.1/24, Area 0  
-            Process ID 56, Router ID 2.2.2.2, Network Type POINT-TO-POINT, Cost: 1  
-            Transmit Delay is 1 sec, State POINT-TO-POINT,  
-            Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5  
-               No Hellos (Passive interface)   #<<<<<< Пассивный интерфейс  
-            Index 1/1, flood queue length 0  
-            Next 0x0(0)/0x0(0)  
-            Last flood scan length is 1, maximum is 1  
-            Last flood scan time is 0 msec, maximum is 0 msec  
-            Suppress hello for 0 neighbor(s)  
+            R1(config)#interface gigabitEthernet 0/0/1.20  
+            R1(config-subif)#encapsulation dot1Q 20  
+            R1(config-subif)#ip address 10.20.0.1 255.255.255.0  
+            R1(config-subif)#description Management  
+            R1(config-subif)#exit   
+            R1(config)#interface gigabitEthernet 0/0/1.30  
+            R1(config-subif)#encapsulation dot1Q 30  
+            R1(config-subif)#ip address 10.30.0.1 255.255.255.0  
+            R1(config-subif)#description Operations  
+            R1(config-subif)#exit   
+            R1(config)#interface gigabitEthernet 0/0/1.40  
+            R1(config-subif)#ip address 10.40.0.1 255.255.255.0  
+            R1(config-subif)#encapsulation dot1Q 40  
+            R1(config-subif)#ip address 10.40.0.1 255.255.255.0
+            R1(config-subif)#description Sales    
+            R1(config-subif)#exit  
+            R1(config)#interface gigabitEthernet 0/0/1.1000  
+            R1(config-subif)#encapsulation dot1Q 1000 native 
+            R1(config-subif)#no ip address  
+            R1(config-subif)#description native  
+            R1(config-subif)#exit  
+
+   2. Настроим интерфейс R2 g0/0/1 с использованием адреса из таблицы и маршрута по умолчанию с адресом следующего перехода 10.20.0.1
+
+            R2(config)#interface gigabitEthernet 0/0/1
+            R2(config-if)#ip address 10.20.0.4 255.255.255.0
+            R2(config-if)#no shutdown 
+            R2(config)#ip route 0.0.0.0 0.0.0.0 10.20.0.1
+            R2(config)#exit
+
+### 5. Настройте удаленный доступ.   
+   1. Настроим все сетевые устройства для базовой поддержки SSH.   
+
+
+            username SSHadmin secret $cisco123!
+            ip domain-name ccna-lab.ru
+            crypto key generate rsa 
+            line vty 0 4
+            login local
+            transport input ssh 
+            exit
+ 
+  2. Включим защищенные веб-службы с проверкой подлинности на R1.  
+
+
+### 5. Проверка подключения.   
+   1. Выполним следующие тесты.  
   
-   5. Изменение базовой пропускной способности для маршрутизаторов.
+            R1:  
+            C:\>ping 10.40.0.10  
+            Reply from 10.40.0.10: bytes=32 time<1ms TTL=127  
+            C:\>ping 10.20.0.1  
+            Reply from 10.20.0.1: bytes=32 time<1ms TTL=255  
   
-            R1(config)# router ospf 56  
-            R1(config-router)# auto-cost reference-bandwidth 1000  
-            R1(config-router)# end  
-            R1# clear ip ospf process  
+            R2:  
+            C:\>ping 10.30.0.10  
+            Reply from 10.30.0.10: bytes=32 time<1ms TTL=127  
+            C:\>ping 10.20.0.1  
+            Pinging 10.20.0.1 with 32 bytes of data:  
+            Reply from 10.20.0.1: bytes=32 time<1ms TTL=255  
+            C:\>ping 172.16.1.1  
+            Reply from 172.16.1.1: bytes=32 time<1ms TTL=255  
   
-            R2(config)# router ospf 56  
-            R2(config-router)# auto-cost reference-bandwidth 1000  
-            R2(config-router)# end  
-            R2# clear ip ospf process  
-              
-        Сообщение в консоли:  
+### 6. Часть 7. Настройка и проверка списков контроля доступа (ACL).   
+   1. Политика №1: Сеть Sales не может использовать SSH в сети Management (но в  другие сети SSH разрешен).  
+
+            R1(config)#ip access-list extended BLOCK_SALES_SSH  
+            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.25 eq 22  
+            R1(config-ext-nacl)#permit ip any any   
+            R1(config-ext-nacl)#exit  
+
+   1. Политика №2: Сеть Sales не имеет доступа к IP-адресам в сети Management с помощью любого веб-протокола (HTTP/HTTPS). Сеть Sales также не имеет доступа к интерфейсам R1 с помощью любого веб-протокола. Разрешён весь другой веб-трафик (обратите внимание — Сеть Sales  может получить доступ к интерфейсу Loopback 1 на R1).   
   
-            R1#  
-            00:27:30: %OSPF-5-ADJCHG: Process 56, Nbr 2.2.2.2 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Adjacency forced to reset  
+            R1(config)#ip access-list extended BLOCK_SALES_WEB  
+            R1(config-ext-nacl)#permit tcp 10.40.0.0 0.0.0.255 host 192.168.1.1 eq 80  
+            R1(config-ext-nacl)#permit tcp 10.40.0.0 0.0.0.255 host 192.168.1.1 eq 443  
+            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 80  
+            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 443  
+            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 host 10.10.0.1 eq 80  
+            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 host 10.10.0.1 eq 443  
+            R1(config-ext-nacl)#permit ip any any   
+            R1(config-ext-nacl)#exit  
+            R1(config)#interface GigabitEthernet0/0/1
+            R1(config-if)#ip access-group BLOCK_SALES_WEB in
+            R1(config-if)#exit
+
+
+__________________________________дальше не делал
   
-            00:27:30: %OSPF-5-ADJCHG: Process 56, Nbr 2.2.2.2 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Interface down or detached  
-  
-            00:28:30: %OSPF-5-ADJCHG: Process 56, Nbr 2.2.2.2 on GigabitEthernet0/0/1 from LOADING to FULL, Loading Done  
-  
-            R2#  
-            00:27:39: %OSPF-5-ADJCHG: Process 56, Nbr 1.1.1.1 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Adjacency forced to reset  
-  
-            00:27:39: %OSPF-5-ADJCHG: Process 56, Nbr 1.1.1.1 on GigabitEthernet0/0/1 from FULL to DOWN, Neighbor Down: Interface down or detached  
-  
-            00:28:30: %OSPF-5-ADJCHG: Process 56, Nbr 1.1.1.1 on GigabitEthernet0/0/1 from LOADING to FULL, Loading Done  
-          
-### 4. Убедитесь, что оптимизация OSPFv2 реализовалась.   
+            R1(config)#interface loopback 1
+            R1(config-if)#ip address 172.16.1.1 255.255.255.0
+            R1(config-if)#no shutdown 
+            R1(config-if)#exit
+            R1(config)#ip route 0.0.0.0 0.0.0.0 l
+            R1(config)#ip route 0.0.0.0 0.0.0.0 loopback 1
   
             R1#show ip ospf interface GigabitEthernet0/0/1  
   
