@@ -205,7 +205,7 @@
                R1(config-subif)#ip access-group SALES_POLICY in  
                R1(config-subif)#exit  
   
-   2. Настройка правил для GigabitEthernet0/0/1.40.  
+   2. Настройка правил для GigabitEthernet0/0/1.30.  
      
                R1(config)#ip access-list extended OPS_POLICY  
                R1(config-ext-nacl)#10 deny tcp 10.30.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 22  
