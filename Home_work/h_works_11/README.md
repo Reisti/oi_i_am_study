@@ -183,54 +183,41 @@
 
   
 ### 6. Настройка и проверка списков контроля доступа (ACL).   
-   1. Сеть Sales не может использовать SSH в сети Management (но в  другие сети SSH разрешен).  
 
-            R1(config)#ip access-list extended BLOCK_SALES_SSH  
-            R1(config-ext-nacl)# 5 deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 22  
-            R1(config-ext-nacl)#permit ip any any   
-            R1(config-ext-nacl)#exit  
-
-   2. Сеть Sales не имеет доступа к IP-адресам в сети Management с помощью любого веб-протокола (HTTP/HTTPS). Сеть Sales также не имеет доступа к интерфейсам R1 с помощью любого веб-протокола. Разрешён весь другой веб-трафик (обратите внимание — Сеть Sales  может получить доступ к интерфейсу Loopback 1 на R1).   
+   1. Настройка правил для GigabitEthernet0/0/1.40.  
+                  
+               R1(config)#ip access-list extended SALES_POLICY  
+               R1(config-ext-nacl)# 10 permit tcp 10.40.0.0 0.0.0.255 host 172.16.1.1 eq www  
+               R1(config-ext-nacl)# 20 permit tcp 10.40.0.0 0.0.0.255 host 172.16.1.1 eq 443  
+               R1(config-ext-nacl)# 30 deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 22  
+               R1(config-ext-nacl)# 40 deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq www  
+               R1(config-ext-nacl)# 50 deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 443  
+               R1(config-ext-nacl)# 60 deny tcp 10.40.0.0 0.0.0.255 host 10.10.0.1 eq www  
+               R1(config-ext-nacl)# 70 deny tcp 10.40.0.0 0.0.0.255 host 10.10.0.1 eq 443  
+               R1(config-ext-nacl)# 80 deny icmp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 echo  
+               R1(config-ext-nacl)# 90 deny icmp 10.40.0.0 0.0.0.255 10.30.0.0 0.0.0.255 echo  
+               R1(config-ext-nacl)# 100 permit icmp 10.20.0.0 0.0.0.255 10.40.0.0 0.0.0.255 echo-reply  
+               R1(config-ext-nacl)# 110 permit icmp 10.30.0.0 0.0.0.255 10.40.0.0 0.0.0.255 echo-reply  
+               R1(config-ext-nacl)# 120 permit icmp any any  
+               R1(config-ext-nacl)# 900 permit ip any any  
+               R1(config)#interface GigabitEthernet0/0/1.40   
+               R1(config-subif)#description Sales Network    
+               R1(config-subif)#ip access-group SALES_POLICY in  
+               R1(config-subif)#exit  
   
-            R1(config)#ip access-list extended BLOCK_SALES_WEB  
-            R1(config-ext-nacl)#permit tcp 10.40.0.0 0.0.0.255 host 172.16.1.1 eq 80  
-            R1(config-ext-nacl)#permit tcp 10.40.0.0 0.0.0.255 host 172.16.1.1 eq 443  
-            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 80  
-            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 443  
-            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 host 10.10.0.1 eq 80  
-            R1(config-ext-nacl)#deny tcp 10.40.0.0 0.0.0.255 host 10.10.0.1 eq 443  
-            R1(config-ext-nacl)#permit ip any any   
-            R1(config-ext-nacl)#exit  
-            R1(config)#interface GigabitEthernet0/0/1  
-            R1(config-if)#ip access-group BLOCK_SALES_WEB in  
-            R1(config-if)#exit    
-
-   3. Сеть Sales не может отправлять эхо-запросы ICMP в сети Operations или Management. Разрешены эхо-запросы ICMP к другим адресатам.  
+   2. Настройка правил для GigabitEthernet0/0/1.40.  
+     
+               R1(config)#ip access-list extended OPS_POLICY  
+               R1(config-ext-nacl)#10 deny tcp 10.30.0.0 0.0.0.255 10.20.0.0 0.0.0.255 eq 22  
+               R1(config-ext-nacl)#20 deny icmp 10.30.0.0 0.0.0.255 10.40.0.0 0.0.0.255 echo  
+               R1(config-ext-nacl)#30 permit icmp 10.40.0.0 0.0.0.255 10.30.0.0 0.0.0.255 echo-reply  
+               R1(config-ext-nacl)#40 permit icmp any any  
+               R1(config-ext-nacl)#900 permit ip any any  
+               R1(config)#interface GigabitEthernet0/0/1.30  
+               R1(config-subif)#description Operations Network  
+               R1(config-subif)#ip access-group OPS_POLICY in  
+               R1(config-subif)#exit  
   
-            R1(config)# ip access-list extended SALES_POLICY  
-            R1(config-ext-nacl)#deny icmp 10.40.0.0 0.0.0.255 10.30.0.0 0.0.0.255 echo  
-            R1(config-ext-nacl)#deny icmp 10.40.0.0 0.0.0.255 10.20.0.0 0.0.0.255 echo  
-            R1(config-ext-nacl)# permit icmp 10.30.0.0 0.0.0.255 10.40.0.0 0.0.0.255 echo-reply  
-            R1(config-ext-nacl)#permit icmp 10.20.0.0 0.0.0.255 10.40.0.0 0.0.0.255 echo-reply  
-            R1(config-ext-nacl)#permit icmp any any  
-            R1(config-ext-nacl)#permit ip any any  
-            R1(config-ext-nacl)#end  
-            R1(config)# interface GigabitEthernet0/0/1.40  
-            R1(config-subif)# ip access-group SALES_POLICY in  
-            R1(config-subif)# exit  
-              
-    
-   3. Cеть Operations  не может отправлять ICMP эхозапросы в сеть Sales. Разрешены эхо-запросы ICMP к другим адресатам.   
-  
-            R1(config)#ip access-list extended BLOCK_OP_ICMP  
-            R1(config-ext-nacl)#deny icmp 10.30.0.0 0.0.0.255 10.40.0.0 0.0.0.255 echo  
-            R1(config-ext-nacl)#permit icmp 10.40.0.0 0.0.0.255 10.30.0.0 0.0.0.255 echo-reply  
-            R1(config-ext-nacl)#permit icmp any any  
-            R1(config-ext-nacl)#permit ip any any  
-            R1(config-ext-nacl)#exit  
-            R1(config)# interface GigabitEthernet0/0/1.30  
-            R1(config-subif)# ip access-group BLOCK_OP_ICMP in  
-            R1(config-subif)# exit  
   
 ### 7.Убедитесь, что политики безопасности применяются развернутыми списками доступа.
 
