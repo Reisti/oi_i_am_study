@@ -139,23 +139,23 @@
             ip nat inside source static 192.168.1.2 209.165.200.229   
 
    3. Протестируем и проверим конфигурацию.   
-  
-   a.	Давайте проверим, что статический NAT работает. На R1 отобразите таблицу NAT на R1 с помощью команды show ip nat translations, и вы увидите статическое сопоставление.  
+    
+   a.	Давайте проверим, что статический NAT работает. На R1 отобразите таблицу NAT на R1 с помощью команды show ip nat translations, и вы увидите статическое сопоставление.    
           
             R1#show ip nat translations   
             Pro  Inside global     Inside local       Outside local      Outside global  
             ---  209.165.200.229   192.168.1.2        ---                ---  
     
     b.	Таблица перевода показывает, что статическое преобразование действует. Проверьте это, запустив ping  с R2 на 209.165.200.229. Плинги должны работать.  
-      
+           
             R2#ping 209.165.200.229  
             Type escape sequence to abort.  
             Sending 5, 100-byte ICMP Echos to 209.165.200.229, timeout is 2 seconds:  
             !!!!!  
             Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms  
-  
+     
     c.	На R1 отобразите таблицу NAT на R1 с помощью команды show ip nat translations, и вы увидите статическое сопоставление и преобразование на уровне порта для входящих pings.  
-  
+          
             R1#show ip nat translations   
             Pro  Inside global     Inside local       Outside local      Outside global  
             icmp 209.165.200.229:45192.168.1.2:45     209.165.200.225:45 209.165.200.225:45  
