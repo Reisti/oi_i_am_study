@@ -175,10 +175,10 @@
             * sys.peer, # selected, + candidate, - outlyer, x falseticker, ~ configured  
              
             S1#show clock 
-            *21:48:2.930 UTC Wed Apr 22 2026
+            21:48:2.930 UTC Wed Apr 22 2026
 
             S2#show clock 
-            *21:47:56.384 UTC Wed Apr 22 2026
+            21:47:56.384 UTC Wed Apr 22 2026
 
  ### Вопрос для повторения.
    
