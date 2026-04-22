@@ -97,41 +97,94 @@
         
             Добавился IP адресс
  
-  ###  3. Обнаружение сетевых ресурсов с помощью протокола LLDP.   
+###  3. Обнаружение сетевых ресурсов с помощью протокола LLDP.   
 
-   1. На R1 очистим текущие трансляции и статистику.   
+   1. Введем соответствующую команду lldp, чтобы включить LLDP на всех устройствах в топологии.   
+
+            R1(config)#lldp run   
+            S1(config)#lldp run  
+            S2(config)#lldp run   
+
+   2.	На S1 выполним соответствующую команду lldp, чтобы предоставить подробную информацию о S2.   
   
-            R1#clear ip nat translation *
-            R1#clear ip nat statistics (Нету в PT) 
+            S1#show lldp neighbors detail 
+            ------------------------------------------------
+            Chassis id: 0001.6377.D301
+            Port id: Fa0/1
+            Port Description: FastEthernet0/1
+            System Name: S2
+            System Description:
+            Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.0(2)SE4, RELEASE SOFTWARE (fc1)
+            Technical Support: http://www.cisco.com/techsupport
+            Copyright (c) 1986-2013 by Cisco Systems, Inc.
+            Compiled Wed 26-Jun-13 02:49 by mnguyen
+            Time remaining: 90 seconds
+            System Capabilities: B
+            Enabled Capabilities: B
+            Management Addresses - not advertised
+            Auto Negotiation - supported, enabled
+            Physical media capabilities:
+               100baseT(FD)
+               100baseT(HD)
+               1000baseT(HD)
+            Media Attachment Unit type: 10
+            Vlan ID: 1
 
-   2. На R1 настроим команду NAT, необходимую для статического сопоставления внутреннего адреса с внешним адресом.  
+      Что такое chassis ID  для коммутатора S2?
+         Chassis ID коммутатора S2, видимый соседям через LLDP: 0001.6377.D301 (Индификатор устройства).  
+
+###  4. Настройка NTP.  
+
+   1. Выведим на экран текущее время.  
+
+   | Дата       |Время     | Часовой пояс| Источник врмени |  
+   |:-----------|:---------|:------------|:----------------|   
+   | 01.03.1993 | 00:21:48 |  UTC        | *               |  
+
+   2. Установим время.  
+
+            R1#clock set 17:32:00 22 apr 2026  
+            R1(config)#clock timezone Izh 4
+   3. Настроим главный сервер NTP.  
+
+      R1(config)#ntp master 4  
+
+   4. Настроим клиентов NTP.  
+
+            S1#show clock   
+            S2#show clock   
+
+   | Дата       |Время     | Часовой пояс| Коммутатор |  
+   |:-----------|:---------|:------------|:-----------|   
+   | 01.03.1993 | 00:31:48 |  UTC        | S1         |    
+   | 01.03.1993 | 00:31:48 |  UTC        | S1         |   
+
+            S1(config)#ntp server 10.22.0.1
+            S2(config)#ntp server 10.22.0.1
+
+   5. Проверим настройку NTP. 
+
+            S1#show ntp associations   
+            address         ref clock       st   when     poll    reach  delay          offset            disp  
+            ~10.22.0.1     127.127.1.1     4    3        16      377    0.00           -14426996.00      0.12  
+            * sys.peer, # selected, + candidate, - outlyer, x falseticker, ~ configured  
   
-            ip nat inside source static 192.168.1.2 209.165.200.229   
+            S2#show ntp associations     
+            address         ref clock       st   when     poll    reach  delay          offset            disp  
+            ~10.22.0.1     127.127.1.1     4    7        16      377    0.00           -14426996.00      0.12  
+            * sys.peer, # selected, + candidate, - outlyer, x falseticker, ~ configured  
+             
+            S1#show clock 
+            *21:48:2.930 UTC Wed Apr 22 2026
 
-   3. Протестируем и проверим конфигурацию.   
-    
-   a.	Давайте проверим, что статический NAT работает. На R1 отобразите таблицу NAT на R1 с помощью команды show ip nat translations, и вы увидите статическое сопоставление.    
-          
-            R1#show ip nat translations   
-            Pro  Inside global     Inside local       Outside local      Outside global  
-            ---  209.165.200.229   192.168.1.2        ---                ---  
-    
-   b.	Таблица перевода показывает, что статическое преобразование действует. Проверьте это, запустив ping  с R2 на 209.165.200.229. Плинги должны работать.  
-           
-            R2#ping 209.165.200.229  
-            Type escape sequence to abort.  
-            Sending 5, 100-byte ICMP Echos to 209.165.200.229, timeout is 2 seconds:  
-            !!!!!  
-            Success rate is 100 percent (5/5), round-trip min/avg/max = 0/0/0 ms  
-     
-   c.	На R1 отобразите таблицу NAT на R1 с помощью команды show ip nat translations, и вы увидите статическое сопоставление и преобразование на уровне порта для входящих pings.  
-          
-            R1#show ip nat translations   
-            Pro  Inside global     Inside local       Outside local      Outside global  
-            icmp 209.165.200.229:45192.168.1.2:45     209.165.200.225:45 209.165.200.225:45  
-            ---  209.165.200.229   192.168.1.2        ---                ---  
+            S2#show clock 
+            *21:47:56.384 UTC Wed Apr 22 2026
 
-          
+ ### Вопрос для повторения.
+   
+   1. Для каких интерфейсов в пределах сети не следует использовать протоколы обнаружения сетевых ресурсов? Поясните ответ.
+   
+   Ответ: Протоколы обнаружения сетевых устройств, не стоит использовать на пользовательских портах, и интерфейсах подключеных к не довереным зонам (например провайдер, подрядич,). Для предотвращения взлома(Заполучение информаций об оборудований, IP адресах и т.д.). Раскрытие структуры сети.
 
 [def]: conf/base_conf_S1.md   
 [def1]: conf/base_conf_S2.md    
